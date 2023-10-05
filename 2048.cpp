@@ -12,6 +12,10 @@ using namespace std;
 // 4*4 matrix(1*1 matrix means to a block)
 int matrix[ITEM_NUM][ITEM_NUM];
 
+// score: every merging get the score(equal to value)
+// example: 2 2 0 0 -> 4 0 0 0(score+=2) 
+int score = 0;
+
 // input command
 string readCommond;
 
@@ -34,71 +38,6 @@ char read_command()
 {
     cin>>readCommond;
     return readCommond[0];
-}
-
-//---------------3.judging whether to win---------------
-// (1) win
-//  0: win
-// -1: continue
-int if_win()
-{
-    // traversal the matrix, return a significative number
-    for (int i = 0; i < ITEM_NUM; i++)
-    {
-        for (int j = 0; j < ITEM_NUM; j++)
-        {
-            if (matrix[i][j] >= WINNING_NUM)
-            {
-                return 0;
-            }
-        }
-    }
-    return -1;
-}
-
-// (2) lose
-//  0: merge
-// -1: continue
-int if_lose()
-{
-    // traversal all blocks' right and down side, judge whether to equal to each other
-    // return_flag means return value
-    int return_flag = 0;
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            // judging whether to have empty block
-            if (matrix[i][j] != 0)
-            {
-                return_flag = -1;
-                return return_flag;
-            }
-
-            // the rightest and lowest side don't need to judge
-            if (i == ITEM_NUM - 1 && j == ITEM_NUM - 1)
-            {
-                continue;
-            }
-
-            // judging the block by the lowest side
-            // just compare the right block with itself
-            if (i >= ITEM_NUM - 1 && matrix[i][j] == matrix[i][j + 1])
-            {
-                return_flag = -1;
-                return return_flag;
-            }
-
-            // judging the block by the rightest side
-            // just compare the down block with itself
-            if (j >= ITEM_NUM - 1 && matrix[i][j] == matrix[i + 1][j])
-            {
-                return_flag = -1;
-                return return_flag;
-            }
-        }
-    }
-    return return_flag;
 }
 
 //---------------4.the merging algorithm---------------
@@ -129,7 +68,7 @@ void merge_by_left()
                 {
                     matrix[i][pos] = value * 2;
                     pos++;
-                    //score += value;
+                    score += value;
                     value = 0;
                 }
                 else
@@ -176,7 +115,7 @@ void merge_by_right()
                 {
                     matrix[i][pos] = value * 2;
                     pos--;
-                    //score += value;
+                    score += value;
                     value = 0;
                 }
                 else
@@ -223,7 +162,7 @@ void merge_by_down()
                 {
                     matrix[pos][j] = value * 2;
                     pos--;
-                    //score += value;
+                    score += value;
                     value = 0;
                 }
                 else
@@ -270,7 +209,7 @@ void merge_by_up()
                 {
                     matrix[pos][j] = value * 2;
                     pos++;
-                    //score += value;
+                    score += value;
                     value = 0;
                 }
                 else
@@ -289,30 +228,6 @@ void merge_by_up()
             matrix[pos][j] = value;
     }
 }
-
-// controller
-void judge_input_command()
-{
-    char char_command = read_command();
-    if (char_command == 'w')
-    {
-        merge_by_up();
-    }
-    else if (char_command == 's')
-    {
-        merge_by_down();
-    }
-    else if (char_command == 'a')
-    {
-        merge_by_left();
-    }
-    else if (char_command == 'd')
-    {
-        merge_by_right();
-    }
-    return;
-}
-
 
 //---------------5.generate the block with random value---------------
 // get the number of zero block
@@ -363,6 +278,101 @@ void give_random_value()
     }
 }
 
+//---------------3.judging whether to win---------------
+// (1) win
+//  0: win
+// -1: continue
+int if_win()
+{
+    // traversal the matrix, return a significative number
+    for (int i = 0; i < ITEM_NUM; i++)
+    {
+        for (int j = 0; j < ITEM_NUM; j++)
+        {
+            if (matrix[i][j] >= WINNING_NUM)
+            {
+                return 0;
+            }
+        }
+    }
+    return -1;
+}
+
+// (2) lose
+//  0: lose
+// -1: continue
+int if_lose()
+{
+    // traversal all blocks' right and down side, judge whether to equal to each other
+    for (int i = 0; i < ITEM_NUM; i++)
+    {
+        for (int j = 0; j < ITEM_NUM; j++)
+        {
+            if (matrix[i][j] == 0)
+            {
+                return -1;
+            }
+
+            if (j != ITEM_NUM - 1)
+            {
+                if (matrix[i][j] == matrix[i][j + 1])
+                {
+                    return -1;
+                }
+            }
+
+            if (i != ITEM_NUM - 1)
+            {
+                if (matrix[i][j] == matrix[i + 1][j])
+                {
+                    return -1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+//---------------*.use the gold finger---------------
+// transform every block into 512
+void gold_finger()
+{
+    for (int i = 0; i < ITEM_NUM; i++)
+    {
+        for (int j = 0; j < ITEM_NUM; j++)
+        {
+            matrix[i][j] = 512;
+        }
+    }
+}
+
+// controller
+void judge_input_command()
+{
+    char char_command = read_command();
+    if (char_command == 'w')
+    {
+        merge_by_up();
+    }
+    else if (char_command == 's')
+    {
+        merge_by_down();
+    }
+    else if (char_command == 'a')
+    {
+        merge_by_left();
+    }
+    else if (char_command == 'd')
+    {
+        merge_by_right();
+    }
+    else if (char_command == 'g')
+    {
+        gold_finger();
+    }
+    return;
+}
+
 //---------------*.printf the matrix---------------
 // printf the matrix
 void printf_matrix()
@@ -378,29 +388,19 @@ void printf_matrix()
     }
 }
 
-//---------------*.calculate the score---------------
+//---------------*.printf the score---------------
 // printf the score
 void printf_score()
 {
+    cout << "now your score is: " << score << endl;
 }
 
-//---------------*.printf the consumed time---------------
-// printf the consumed time
-void p_consuming_time()
+//---------------*.printf the duration---------------
+// printf the duration
+void printf_duration(clock_t start)
 {
-}
-
-//---------------*.use the gold finger---------------
-// transform every block into 1024
-void gold_finger()
-{
-    for (int i = 0; i < ITEM_NUM; i++)
-    {
-        for (int j = 0; j < ITEM_NUM; j++)
-        {
-            matrix[i][j] = 512;
-        }
-    }
+    clock_t end = clock();
+    cout << "now the game duration is: " << (double)(end-start) / CLOCKS_PER_SEC << endl;
 }
 
 //---------------*.draw the miku---------------
@@ -441,36 +441,44 @@ void start_game()
 {
     srand(time(NULL));
     init_matrix();
-    give_random_value();
-    printf_matrix();
-    cout << "plz input the command 'w s a d' to realize 'up down left right'" << endl;
+
+    clock_t start;
+    start = clock();
 
     while (1)
     {
         // win or lose
-        if (if_win == 0)
+        if (if_win() == 0)
         {
             draw_miku();
             cout << "ありがとうございます !" << endl;
             Sleep(2000);
             return;
         }
-        if (if_lose == 0)
+        if (if_lose() == 0)
         {
             draw_miku();
             cout << "寄嬋健 です!" << endl;
             Sleep(2000);
             return;
         }
+        cout << "-------------------------------------" << endl;
+        // generate new block with value
+        give_random_value();
+
+        cout << "plz input the command 'w s a d' to realize 'up down left right'" << endl;
+        printf_duration(start);
+        printf_score();
+
+        // printf the matrix and score
+        printf_matrix();
+        cout << "-------------------------------------" << endl;
 
         // merge
         judge_input_command();
 
-        // generate new block with value
-        give_random_value();
-
-        // printf the matrix
-        printf_matrix();
+        // clean the content
+        system("cls");
     }
 }
 
